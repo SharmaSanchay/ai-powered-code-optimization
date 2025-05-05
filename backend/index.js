@@ -3,6 +3,7 @@ const app = express();
 require('dotenv').config();
 const cors = require('cors');
 const analyzeCode = require('./service/AIcode');
+const run = require('./service/run');
 
 // Middleware
 app.use(cors({
@@ -25,7 +26,16 @@ app.post('/issue', async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 });
-
+app.post('/run',async (req,res)=>{
+    const {code,language} = req.body;
+    try{
+        const response = await run(code,language);
+        return res.json(response);
+    }
+    catch(error){
+        return res.json({error});
+    }
+})
 // Start server
 app.listen(3000, () => {
     console.log("Server is running on port 3000");

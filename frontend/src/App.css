@@ -70,6 +70,11 @@
     background-color: #5a6268;
   }
 
+  .analyze-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
   .header-container {
     display: flex;
     justify-content: space-between;
@@ -102,10 +107,9 @@
   }
 
   .navbar-signin {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Push the profile icon to the far right */
   }
 
   .navbar-signin button {
@@ -128,4 +132,91 @@
   .navbar-signin button:focus {
     outline: 2px solid #ffffff;
     outline-offset: 2px;
+  }
+
+  .navbar-options {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+  }
+
+  .language-selector {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+
+  .language-selector:hover {
+    border-color: #007acc;
+  }
+
+  .language-selector:focus {
+    outline: none;
+    border-color: #005f99;
+  }
+
+  .run-code-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .run-code-button {
+    padding: 12px 30px;
+    background-color: #28a745; /* Green color for visibility */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+
+  .run-code-button:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+
+  .run-code-button:focus {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  .navbar-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .navbar-button {
+    padding: 8px 16px;
+    background-color: #28a745; /* Green color for visibility */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  .navbar-button:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+
+  .navbar-button:focus {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
   }
