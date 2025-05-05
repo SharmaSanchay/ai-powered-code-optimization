@@ -4,7 +4,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton, RedirectToSignIn } from 
 import './App.css';
 import axios from 'axios';
 
-function CodeAnalyzer() {
+function App() {
   const [code, setCode] = useState('');
   const [correctedCode, setCorrectedCode] = useState('');
   const [downloadText, setDownloadText] = useState('');
@@ -17,6 +17,7 @@ function CodeAnalyzer() {
     try {
       const response = await axios.post('http://localhost:3000/issue', { code });
       setCorrectedCode(response.data)
+      setDownloadText(response.data);
     } catch (error) {
       setCorrectedCode('An error occurred while analyzing the code.');
       setDownloadText('');
@@ -107,4 +108,4 @@ function CodeAnalyzer() {
   );
 }
 
-export default CodeAnalyzer;
+export default App;
