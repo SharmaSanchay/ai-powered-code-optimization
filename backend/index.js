@@ -18,12 +18,11 @@ app.post('/issue', async (req, res) => {
         if (!code) {
             return res.status(400).json({ error: "No code provided" });
         }
-        console.log(code);
         const issue = await analyzeCode(code);
         return res.json(issue);
     } catch (error) {
         console.error("Error analyzing code:", error);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(502).json({ error: error.message || "Analysis failed" });
     }
 });
 app.post('/run',async (req,res)=>{
@@ -33,7 +32,7 @@ app.post('/run',async (req,res)=>{
         return res.json(response);
     }
     catch(error){
-        return res.json({error});
+        return res.status(400).json({error: error.message || "Execution failed"});
     }
 })
 // Start server

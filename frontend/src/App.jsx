@@ -1,35 +1,35 @@
-import React, { useState } from "react";
-import Editor from "@monaco-editor/react";
 import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-  RedirectToSignIn,
+    RedirectToSignIn,
+    SignedIn,
+    SignedOut,
+    SignInButton,
+    UserButton,
 } from "@clerk/clerk-react";
-import "./App.css";
+import Editor from "@monaco-editor/react";
 import axios from "axios";
+import { useState } from "react";
+import "./App.css";
 
 function App() {
   const [code, setCode] = useState("");
-  const [correctedCode, setCorrectedCode] = useState("");
+  const [result, setResult] = useState(null);
   const [downloadText, setDownloadText] = useState("");
   const [loading, setLoading] = useState(false);
   const [purpose,setpurpose]=useState("Analyze Code");
   const [language, setLanguage] = useState("javascript");
   const handleAnalyzeCode = async () => {
     setLoading(true);
-    setCorrectedCode("");
+    setResult(null);
     setDownloadText("");
     try {
       setpurpose("analyze");
       const response = await axios.post("http://localhost:3000/issue", {
         code,
       });
-      setCorrectedCode(response.data);
-      setDownloadText(response.data);
+      setResult(response.data);
+      setDownloadText(JSON.stringify(response.data, null, 2));
     } catch (error) {
-      setCorrectedCode("An error occurred while analyzing the code.");
+      setResult({ error: error.response?.data?.error || "An error occurred while analyzing the code." });
       setDownloadText("");
     }
     setLoading(false);
@@ -57,16 +57,15 @@ function App() {
      try {
       setpurpose("output");
       setLoading(true);
-      setCorrectedCode("");
+      setResult(null);
       const response = await axios.post("http://localhost:3000/run", {
         code,
         language,
       });
-      console.log(response);
-      setCorrectedCode(response.data);
+      setResult(response.data);
      } catch (error) {
         alert("An error occurred while running the code.");
-        setCorrectedCode(error.message);
+        setResult({ error: error.response?.data?.error || error.message });
      }
      setLoading(false);
   };
@@ -85,9 +84,6 @@ function App() {
               >
                 <option value="javascript">JavaScript</option>
                 <option value="python">Python</option>
-                <option value="java">Java</option>
-                <option value="c">C</option>
-                <option value="cpp">C++</option>
               </select>
               <button className="navbar-button" onClick={handleRunCode}>
                 Run Code
@@ -124,12 +120,74 @@ function App() {
             </div>
             <div className="issues">
               <label className="label">{purpose}</label>
-              <textarea
-                className="textarea"
-                value={loading ? "Please wait..." : correctedCode}
-                readOnly
-                placeholder="Corrected code will appear here"
-              />
+              <div className="result-panel" aria-live="polite">
+                {loading && <p className="result-empty">Working...</p>}
+                {!loading && !result && <p className="result-empty">Your results will appear here.</p>}
+                {!loading && result?.error && <p className="result-error">{result.error}</p>}
+                {!loading && result && !result.error && purpose === "analyze" && (
+                  <>
+                    <section className="result-section">
+                      <div className="result-heading">
+                        <h2>Review</h2>
+                        <span className={`severity severity-${result.severity || "low"}`}>
+                          {result.severity || "low"} severity
+                        </span>
+                      </div>
+                      <p>{result.summary}</p>
+                    </section>
+                    <section className="result-section">
+                      <h2>Issues ({result.bugs?.length || 0})</h2>
+                      {result.bugs?.length ? result.bugs.map((bug, index) => (
+                        <article className="bug-item" key={`${bug.title}-${index}`}>
+                          <div className="result-heading">
+                            <h3>{bug.title}</h3>
+                            <span className={`severity severity-${bug.severity}`}>{bug.severity}</span>
+                          </div>
+                          <p>{bug.description}</p>
+                          {bug.fix && <p><strong>Fix:</strong> {bug.fix}</p>}
+                        </article>
+                      )) : <p>No bugs identified.</p>}
+                    </section>
+                    <section className="result-section complexity">
+                      <h2>Complexity</h2>
+                      <p><strong>Time</strong><span>{result.complexity?.time || "Not estimated"}</span></p>
+                      <p><strong>Space</strong><span>{result.complexity?.space || "Not estimated"}</span></p>
+                    </section>
+                    <section className="result-section">
+                      <h2>Suggestions</h2>
+                      {result.suggestions?.length ? (
+                        <ul>{result.suggestions.map((suggestion, index) => <li key={index}>{suggestion}</li>)}</ul>
+                      ) : <p>No suggestions.</p>}
+                    </section>
+                    <section className="result-section">
+                      <h2>Corrected Code</h2>
+                      <pre className="code-result"><code>{result.corrected_code}</code></pre>
+                    </section>
+                  </>
+                )}
+                {!loading && result && !result.error && purpose === "output" && (
+                  <>
+                    <section className="result-section">
+                      <div className="result-heading">
+                        <h2>{result.success ? "Execution complete" : "Execution failed"}</h2>
+                        <span className={`severity ${result.success ? "severity-low" : "severity-high"}`}>
+                          exit {result.exit_code ?? "n/a"}
+                        </span>
+                      </div>
+                      {result.timed_out && <p>Execution timed out.</p>}
+                      {result.output_limited && <p>Output exceeded the 10 KB limit.</p>}
+                    </section>
+                    <section className="result-section">
+                      <h2>Output</h2>
+                      <pre className="code-result">{result.stdout || "(no output)"}</pre>
+                    </section>
+                    {result.stderr && <section className="result-section">
+                      <h2>Errors</h2>
+                      <pre className="code-result error-output">{result.stderr}</pre>
+                    </section>}
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="button-row">
